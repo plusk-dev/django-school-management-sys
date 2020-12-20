@@ -1,0 +1,11 @@
+.container {
+	padding-top: 14px;
+	margin: auto;
+}
+
+.card {
+	padding: 25px;
+	max-width: 540px;
+	border-radius: 25px;
+}
+/* more css coming soon*/

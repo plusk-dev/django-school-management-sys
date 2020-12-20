@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
+{% endblock %}
+{% block body %}
+<br>
+<div class="container card">
+	<h1 style="font-weight: lighter;">Login as an Administrator</h1><hr>
+	<form method="POST">
+		{% csrf_token %}
+		{{ form.as_p }}
+		<button class="btn btn-outline-dark">Login</button>
+	</form>
+</div>
+{% endblock %}

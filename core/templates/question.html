@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block styles %}
+<style type="text/css">
+  .card {
+    border-radius: 25px;
+    padding: 25px;
+  }
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+	<h1>{{ que.title }}</h1>
+	<small class="text-muted">on {{ que.date }} by {{ que.asker }} for class {{ que.std }}</small><br><br>
+	<p>{{ que.description }}</p><hr>
+	{% if not user.person.is_teacher and not user.person.is_admin %}
+	<form method="POST">
+		{% csrf_token %}
+		{{ form|crispy }}
+		<br>
+		<button class="btn btn-primary">Submit</button>
+	</form>
+	{% endif %}
+	{% if answers %}
+	<h3>Submissions:</h3>
+	<hr>
+	{% for ans in answers %}
+	{% if ans.author == user.person %}
+	<div class="card border-success">
+	{% else %}
+	<div class="card">
+	{% endif %}
+		<h3>{{ ans.author }} on {{ ans.date }}</h3>
+		{{ ans.answer|safe }}
+
+		{% if ans.status == False %}
+		{% if user.person.is_teacher %}
+		<a href="{% url 'markCorrect' ans.pk %}" class="btn btn-outline-success btn-sm" style="margin-left: auto;">Mark as correct.</a>
+		{% endif %}
+		{% else %}
+		<span style="margin-right: auto;" class="badge bg-success">Marked as correct.</span>
+		{% endif %}
+		{% if ans.author == user.person %}
+		<a href="{% url 'delete_ans' ans.pk %}" class="btn btn-outline-danger btn-sm" style="margin-left: auto;">Delete</a>
+		{% endif %}
+	</div>
+	<br>
+	{% endfor %}
+	{% else %}
+	<h3>No answers yet...</h3>
+	{% endif %}
+</div>
+<script type="text/javascript">
+  var name = '{{ user.person.pk }}';
+  document.getElementById('author').value = name;
+  var name = '{{ que.pk }}';
+  document.getElementById('question').value = name;
+</script>
+{% endblock %}

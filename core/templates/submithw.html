@@ -1,0 +1,107 @@
+{% extends 'base.html' %} {% load crispy_forms_tags %} {% block styles %}
+<style type="text/css">
+  .card {
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    padding: 22px;
+  }
+  #div_id_status {
+    display: none;
+  }
+</style>
+{% endblock %} {% block body %}
+<div class="container">
+  <h1><i class="fas fa-book"></i> Submit Homework</h1>
+  <hr />
+  <h2>{{ hw.title }}</h2>
+  <small class="text-muted">
+    on {{ hw.date }} by {{ hw.asker }} for class {{ hw.std }}</small
+  >
+  <p>{{ hw.description }}</p>
+  <a target="blank" href="{{ hw.url }}" class="btn btn-dark btn-sm"
+    >View Attached URL</a
+  >
+  <!-- Button trigger modal -->
+  {% if not user.person.is_teacher %}
+  <button
+    type="button"
+    class="btn btn-primary btn-sm"
+    data-bs-toggle="modal"
+    data-bs-target="#exampleModal"
+  >
+    Submit
+  </button>
+
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="exampleModal"
+    tabindex="-1"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Submission Form</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form method="POST">
+            {% csrf_token %} {{ form|crispy }}
+            <button class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %} {% if subs %}
+  <h3 style="padding-top: 50px">Submissions({{ subs.count }})</h3>
+  <hr />
+  {% for sub in subs %} {% if sub.submitter == user.person %}
+  <div class="card border-success">
+    {% else %}
+    <div class="card">
+      {% endif %}
+      <h5>{{ sub.submitter }}</h5>
+      <small class="text-muted"> on {{ sub.date }}</small>
+      <hr />
+      {{ sub.answer }}
+      <div>
+      {% if sub.status == False %}
+      {% if user.person.is_teacher %}
+      <a href="{% url 'markHWCorrect' sub.pk %}" class="btn btn-outline-success btn-sm" style="margin-left: auto;">Mark as correct.</a>
+      {% endif %}
+      {% else %}
+      <span style="margin-right: auto;" class="badge bg-success">Marked as correct.</span>
+      {% endif %}
+  
+      {% if sub.url %}
+      <a
+        href="{{ sub.url }}"
+        class="btn btn-outline-primary btn-sm"
+        style="max-width: 150px; margin-left: auto"
+        >Attached URL</a
+      >
+      {% endif %}
+      </div>
+    </div>
+    <br />
+    {% endfor %} {% else %}
+    <h3 style="padding-top: 50px">No submissions yet...</h3>
+    <hr />
+    {% endif %}
+  </div>
+  <script type="text/javascript">
+    var name = "{{ user.person.pk }}";
+    document.getElementById("submitter").value = name;
+    var homework = "{{ hw.pk }}";
+    document.getElementById("hw").value = homework;
+  </script>
+  {% endblock %}
+</div>

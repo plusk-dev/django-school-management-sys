@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block styles %}
+<style type="text/css">
+  .card {
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    padding: 10px;
+  }
+  .card .card {
+    padding: 20px;
+  }
+  .card .card:hover {
+    box-shadow: none;
+  }
+  .questions {
+    border: 1px solid lightgreen;
+  }
+
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+<h1 style="font-weight: lighter;">Hello, {{ user.username }}</h1>
+<a href="{% url 'pvt_announcements' %}" class="btn btn-success"><i class="far fa-eye-slash"></i> View Private Announcements</a>
+<a href="{% url 'announcements' %}" class="btn btn-success"><i class="far fa-eye"></i> View All Announcements</a>
+    <hr>
+    <h1 style='text-align:center; font-weight: lighter;'>" {{ quote }} "</h1>
+    <hr>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {% for room in rooms %}
+  <div class="col">
+    <div class="card border-success">
+      <div class="card-body">
+        <h5 class="card-title"><strong>{{ room.title }}</strong></h5><hr>
+        <p class="card-text">
+          <ul>
+            <li>Meeting ID: {{ room.meeting_id }}</li>
+            <li>Password: {{ room.password }}</li>
+            <li>To Start: {{ room.to_start }}</li>
+            <li>Host: {{ room.host }}</li>
+          </ul>
+          <a href="{{ room.link }}" class="btn btn-outline-success btn-sm" style="width: 100%">Join</a>
+        </p>
+      </div>
+    </div>
+    
+  </div>
+  {% endfor %}
+</div><br>
+
+ <div class="row"> 
+            <div class="col-lg-6 mb-4"> 
+                <div class="card border-success section-card"> 
+                    <img class="card-img-top" src="" alt=""> 
+  
+                    <div class="card-body"> 
+                        <h3 class="card-title"><i class="fas fa-book"></i> Homeworks Today </h3> 
+                        <hr>
+                        <p class="card-text"> 
+                          {% if hws %}
+                            {% for hw in hws %}
+                            {% if hw.std == user.person.std %}
+                            <div class="card">
+                              <h4>{{ hw.title }}</h4><small class="text-muted"> on {{ hw.date }} by {{ hw.asker }} for class {{ hw.std }}</small> 
+                              <p>{{ hw.description }}</p>
+                              <div class="btn-group" role="group" aria-label="Basic outlined example">
+                                  <a target="blank" href="{{ hw.url }}" class="btn btn-outline-success btn-sm" style="max-width: 50%">View Attached URL</a>
+                              <a href="{% url 'submit_hw' hw.pk %}" class="btn btn-success btn-sm">Submit</a>
+                              </div>
+                            </div>
+                            <br>
+                            {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            <h3>No Homeworks Today...</h3>
+                            {% endif %}
+                        </p>
+                        <div class="accordion accordion-flush border-success" id="accordionFlushExample">
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="flush-headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse2" aria-expanded="false" aria-controls="flush-collapseOne">
+                              View All
+                            </button>
+                          </h2>
+                          <div id="flush-collapse2" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                            <div class="accordion-body">
+                              {% for k in allhw %}
+                              <div class="card border-success" style="padding: 15px">
+                                <h4><a href="{% url 'submit_hw' k.pk %}" class="stretched-link">{{ k.title }}</a></h4>
+                                <small class="text-muted">on {{ k.date }} for {{ k.std }}</small>
+                                <p>{{ k.description }}</p>
+                              </div>
+                              <br>
+                              {% endfor %}
+                              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse2" aria-expanded="false" aria-controls="flush-collapseOne">
+                              View Less
+                            </button>
+                            </div>
+
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div> 
+                </div> 
+            </div> 
+            <div class="col-lg-6 mb-4"> 
+                <div class="card questions section-card">
+                    <div class="card-body"> 
+                        <h3 class="card-title"><i class="far fa-question-circle"></i> Questions Today</h3> 
+                        <hr>
+                        <p class="card-text"> 
+                          {% if ques %}
+                            {% for hw in ques %}
+                            {% if hw.std == user.person.std %}
+                            <div class="card">
+                              <h4>{{ hw.title }}</h4><small class="text-muted"> on {{ hw.date }} by {{ hw.asker }} for class {{ hw.std }}</small> 
+                              <p>{{ hw.description }}</p>
+                              <a href="{% url 'question' hw.pk %}" class="btn btn-outline-success btn-sm">View</a>
+                            </div>
+                            <br>
+                            {% endif %}
+                            {% endfor %}
+                            {% else %}
+                            <h3>No Questions Today...</h3>
+                            {% endif %}
+                          </p>
+                      <div class="accordion accordion-flush border-success" id="accordionFlushExample">
+                        <div class="accordion-item">
+                          <h2 class="accordion-header" id="flush-headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse007" aria-expanded="false" aria-controls="flush-collapseOne">
+                              View All
+                            </button>
+                          </h2>
+                          <div id="flush-collapse007" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                            <div class="accordion-body">
+                            <div class="accordion-body">
+                              {% for k in allques %}
+                              <div class="card border-success" style="padding: 15px">
+                                <h4><a href="{% url 'submit_hw' k.pk %}" class="stretched-link">{{ k.title }}</a></h4>
+                                <small class="text-muted">on {{ k.date }} for {{ k.std }}</small>
+                                <p>{{ k.description }}</p>
+                              </div>
+                              <br>
+                              {% endfor %}
+                            </div>
+                            <button class="collapsed accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse007" aria-expanded="false" aria-controls="flush-collapseOne">View Less</button>
+
+                            </div>
+                          </div>
+                        </div>
+                        </div>                           
+                    </div> 
+                </div> 
+            </div>
+            <div class="col-lg-6 mb-4"> 
+                <div class="card border-success"> 
+                    <img class="card-img-top" src="" alt=""> 
+  
+                    <div class="card-body"> 
+                        <h3 class="card-title">Your Submissions (Homeworks)</h3> 
+                        <hr>
+                        <p class="card-text"> 
+                            {% for sub in subs %}
+                            
+                            <div class="card">
+                              <h4>To <a href="{% url 'submit_hw' sub.hw.pk %}" style="margin-top: 8px" class="stretched-link">{{ sub.hw.title }}</a></h4><small class="text-muted"> on {{ sub.date }}</small> 
+                              <p>{{ hw.description }}</p>
+                            </div>
+                            <br>
+                            
+                            {% endfor %}
+                        </p>
+                    </div> 
+                </div> 
+            </div> 
+
+        </div> 
+    </div>
+</div>
+{% endblock %}

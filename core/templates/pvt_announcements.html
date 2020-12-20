@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block styles %}
+<style type="text/css">
+	.card {
+		border-radius: 25px;
+		padding: 15px;
+	}
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+{% if anns %}
+{% for ann in anns %}
+<div class="card">
+	<h1><i class="fas fa-bullhorn"></i>  {{ ann.title }}</h1><small class="text-muted">on {{ ann.date }}</small>
+	<p>{{ ann.content|safe }}</p>
+</div>
+<br>
+{% endfor %}
+{% endif %}
+</div>
+{% endblock %}

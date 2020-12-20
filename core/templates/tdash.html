@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block styles %}
+
+<style type="text/css">
+
+	.card {
+		border-radius: 25px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+	}
+	.question {
+		padding: 22px;
+		border-radius: 25px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+	}
+  .card .card {
+    padding: 20px;
+  }
+  .card .card:hover {
+    box-shadow: none;
+  }
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+	<h2 style="font-weight: lighter;">Hello, {{ user.username }}</h2>
+
+	<!-- Button trigger modal -->
+
+	<div style="display: inline-block;">
+		<button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#exampleModal" style="display: inherit;max-width: 150px;">
+		  <i class="fas fa-book"></i> New Homework
+		</button>
+		<a href="{% url 'create_room' %}" class="btn btn-outline-success btn-sm" style="margin-left: 3px;"><i class="fas fa-plus"></i> Create Room</a>
+	</div>
+
+		<!-- Modal -->
+		<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		  <div class="modal-dialog modal-xl">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <h5 class="modal-title" id="exampleModalLabel"><i class="fas fa-book"></i> Enter Homework Details </h5>
+		        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		      </div>
+		      <div class="modal-body">
+		        <form method="POST" action="create_homework">
+		        	{% csrf_token %}
+		        	{{ hwform|crispy }}
+		      </div>
+		      <div class="modal-footer">
+		        <button class="btn btn-outline-primary" style="margin-top: 16px;">Create</button>
+		      </div>
+		      </form>
+		    </div>
+		  </div>
+		</div>
+
+		<hr>
+		<h1 style='text-align:center'>" {{ quote }} "</h1>
+		<hr>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {% for room in rooms %}
+  <div class="col">
+    <div class="card border-success">
+      <div class="card-body">
+        <h5 class="card-title"><strong>{{ room.title }}</strong></h5><hr>
+        <p class="card-text">
+        	<ul>
+        		<li>Meeting ID: {{ room.meeting_id }}</li>
+        		<li>Password: {{ room.password }}</li>
+        		<li>To Start: {{ room.to_start }}</li>
+        		<li>For: Class {{ room.std }}</li>
+        		<li>Host: {{ room.host }}</li>
+        	</ul>
+              <div class="btn-group" role="group" style="width: 100%" aria-label="Basic outlined example">
+                  <a href="{% url 'delete_room' room.pk %}" class="btn btn-outline-danger btn-sm"><i class="fas fa-trash"></i></a>
+              <a href="{{ room.link }}" class="btn btn-success btn-sm">Join</a>
+              </div>
+
+        </p>
+      </div>
+    </div>
+    
+  </div>
+  {% endfor %}
+</div><br>
+
+<div class="row"> 
+<div class="col-lg-6 mb-4"> 
+<div class="card border-success"> 
+    <img class="card-img-top" src="" alt=""> 
+    <div class="card-body"> 
+        <h3 class="card-title"><i class="fas fa-book"></i> Homeworks Today</h3> 
+        <hr>
+        <p class="card-text"> 
+        	{% if hws %}
+            {% for hw in hws %}
+            <div class="card">
+              <h4>{{ hw.title }}</h4><small class="text-muted"> on {{ hw.date }} by {{ hw.asker }} for class {{ hw.std }}</small> 
+              <p>{{ hw.description }}</p>
+              <div class="btn-group" role="group" aria-label="Basic outlined example">
+                  <a target="blank" href="{{ hw.url }}" class="btn btn-outline-success btn-sm" style="max-width: 50%">View Attached URL</a>
+              <a href="{% url 'submit_hw' hw.pk %}" class="btn btn-success btn-sm">View Submissions</a>
+              </div>
+            </div>
+            <br>
+            {% endfor %}
+            {% else %}
+            <h3>You have not given any homeworks today...</h3>
+            {% endif %}
+        </p>
+			<div class="accordion accordion-flush border-success" id="accordionFlushExample">
+			  <div class="accordion-item">
+			    <h2 class="accordion-header" id="flush-headingOne">
+			      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+			        View All
+			      </button>
+			    </h2>
+			    <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+			      <div class="accordion-body">
+			      	{% for k in allhw %}
+			      	<div class="card border-success" style="padding: 25px">
+			      		<h4><a href="{% url 'submit_hw' k.pk %}" class="stretched-link">{{ k.title }}</a></h4>
+			      		<small class="text-muted">on {{ k.date }} for {{ k.std }}</small>
+			      		<p>{{ k.description }}</p>
+			      	</div>
+			      	<br>
+			      	{% endfor %}
+			      </div>
+			    </div>
+			  </div>
+			</div>
+        </div> 
+    </div> 
+</div> 
+<div class="col-lg-6 mb-4"> 
+    <div class="card" style="border-color: lightgreen;">
+        <div class="card-body"> 
+            <h3 class="card-title"><i class="far fa-question-circle"></i> Questions Today</h3> 
+            <hr>
+            <p class="card-text"> 
+            	{% if ques %}
+                {% for hw in ques %}
+                <div class="card">
+                  <h4>{{ hw.title }}</h4><small class="text-muted"> on {{ hw.date }} by {{ hw.asker }} for class {{ hw.std }}</small> 
+                  <p>{{ hw.description }}</p>
+                  <a href="{% url 'question' hw.pk %}" class="btn btn-outline-success btn-sm">View</a>
+                </div>
+                <br>
+                {% endfor %}
+                {% else %}
+                <h3>You have not asked any questions today...</h3>
+                {% endif %}
+              </p>
+  			<div class="accordion accordion-flush border-success" id="accordionFlushExample">
+			  <div class="accordion-item">
+			    <h2 class="accordion-header" id="flush-headingOne">
+			      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse2" aria-expanded="false" aria-controls="flush-collapseOne">
+			        View All
+			      </button>
+			    </h2>
+			    <div id="flush-collapse2" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+			      <div class="accordion-body">
+			      <div class="accordion-body">
+			      	{% for k in allques %}
+			      	<div class="card border-success" style="padding: 25px">
+			      		<h4><a href="{% url 'submit_hw' k.pk %}" class="stretched-link">{{ k.title }}</a></h4>
+			      		<small class="text-muted">on {{ k.date }} for {{ k.std }}</small>
+			      		<p>{{ k.description }}</p>
+			      	</div>
+			      	<br>
+			      	{% endfor %}
+			      </div>
+
+			      </div>
+			    </div>
+			  </div>
+			</div>                           
+        </div> 
+    </div> 
+</div>
+<div style="padding: 13px;">
+	<form method="POST" class="card border-success" style="padding: 25px">
+		<h5 style="font-weight: lighter;"><i class="far fa-question-circle"></i> Ask a Question to your lovely Students...</h5>
+		<hr>
+		{% csrf_token %}
+		{{ form|crispy }}
+		<button class="btn btn-success" style="width: 100%; margin-top: 16px;">Ask</button>
+	</form>
+</div>
+	<br>
+</div>
+<br>
+<script type="text/javascript">
+  var name = '{{ user.person.pk }}';
+  document.getElementById('asker').value = name;
+  var name = '{{ user.person.pk }}';
+  document.getElementById('bruh').value = name;
+</script>
+
+{% endblock %}

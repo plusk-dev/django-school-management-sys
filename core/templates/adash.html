@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'main.css' %}">
+<style type="text/css">
+	td {
+		max-width: 150px;
+	}
+
+	.card {
+		border-radius: 25px;
+		box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+	}
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+<h1 class="thin" style="font-weight: lighter;">Hello, {{ user.username }}</h1>
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  <i class="fas fa-bullhorn"></i> Make an Announcement
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><i class="fas fa-bullhorn"></i> Announcement Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST">
+          {% csrf_token %}
+          {{ annform|crispy }}
+          <button class="btn btn-outline-success">Announce</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<hr>
+
+<table class="table table-striped border-success">
+	<h4>Students :</h4><hr>
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Username</th>
+      <th scope="col">Email Address</th>
+      <th scope="col">Date Created</th>
+      <th scope="col">Class</th>
+      <th scope="col">Cell</th>
+      <th scope="col">Address</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% for user in users %}
+  	{% if not user.person.is_teacher and not user.person.is_admin %}
+    <tr>
+      <th scope="row">{{ user.pk }}</th>
+      <td>{{ user.username }}</td>
+      <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+      <td>{{ user.date_joined }}</td>
+      <td>{{ user.person.std }}</td>
+      {% if user.person.phone %}
+      <td><a href="tel:{{ user.person.phone }}">{{ user.person.phone }}</a></td>
+      {% else %}
+      <td>Not Provided</td>
+      {% endif %}
+      {% if user.person.address %}
+      <td>{{ user.person.address }}</td>
+      {% else %}
+      <td>Not Provided</td>
+      {% endif %}
+      <td><a href='{% url "delete_person" user.pk %}' class="btn btn-outline-danger btn-sm">Delete</a></td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+<br><br>
+<table class="table table-striped border-success">
+<h4>Teachers:</h4><hr>
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Username</th>
+      <th scope="col">Email Address</th>
+      <th scope="col">Date Created</th>
+      <th scope="col">Cell</th>
+      <th scope="col">Address</th>
+      <th scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% for user in users %}
+  	{% if user.person.is_teacher %}
+    <tr>
+      <th scope="row">{{ user.pk }}</th>
+      <td>{{ user.username }}</td>
+
+      <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+      <td>{{ user.date_joined }}</td>
+      {% if user.person.phone %}
+      <td><a href="tel:{{ user.person.phone }}">{{ user.person.phone }}</a></td>
+      {% else %}
+      <td>Not Provided</td>
+      {% endif %}
+      {% if user.person.address %}
+      <td>{{ user.person.address }}</td>
+      {% else %}
+      <td>Not Provided</td>
+      {% endif %}
+      <td><a href='{% url "delete_person" user.pk %}' class="btn btn-outline-danger btn-sm">Delete</a></td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="border-success" style=" padding: 25px;border-radius: 25px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;">
+  	<h5 class="visible" style="font-weight: lighter;">New Member in the Society: </h5><hr>
+  	<form method="POST" action="{% url 'create_person' %}">
+  		{% csrf_token %}
+  		{{ form|crispy }}
+  		{{ more|crispy }}
+  		<button class="btn btn-dark" style="margin-top: 16px;">Create</button>
+  	</form>
+</div>
+<br><hr>
+
+</div>
+<br><br>
+{% endblock %}
