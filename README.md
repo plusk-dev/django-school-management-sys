@@ -1,5 +1,7 @@
 # Setup
 
+Install all the required packages: `pip install -r requirements.txt`
+
  1. `python manage.py makemigrations`
  2. `python manage.py migrate`
  3. `python manage.py createsuperuser`
