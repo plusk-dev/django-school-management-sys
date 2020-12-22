@@ -1,7 +1,8 @@
 from django import forms
-from .models import Person, Question, Homework, Submission, Answer, Room, Announcement
+from .models import Person, Question, Homework, Submission, Answer, Room, Announcement, Exam
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+
 
 #from .models import Person
 
@@ -69,3 +70,8 @@ class AnnouncementForm(forms.ModelForm):
 		model = Announcement
 		fields = '__all__'
 		
+
+class ExamForm(forms.ModelForm):
+	class Meta:
+		model = Exam
+		fields = '__all__'

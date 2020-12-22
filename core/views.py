@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import NewStudentForm, QuestionForm, HomeworkForm, SubmitForm, AnswerForm, RoomForm, AnnouncementForm, MoreNewStudentForm
+from .forms import NewStudentForm, QuestionForm, HomeworkForm, SubmitForm, AnswerForm, RoomForm, AnnouncementForm, MoreNewStudentForm, ExamForm
 from .models import Person, Homework, Question, Submission, Answer, Room, Announcement
 import datetime
 from .quotes import quote
@@ -212,3 +212,8 @@ class CreatePerson(LoginRequiredMixin, View):
                     messages.warning(request, 'Student Created Successfully.')
                     return redirect('admin_dashboard')
 
+class CreateExamView(LoginRequiredMixin, View):
+    template_name = 'new_exam.html'
+    def get(self ,request):
+        form = ExamForm()
+        return render(request, self.template_name, {'form':form})

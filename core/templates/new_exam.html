@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block styles %}
+<style type="text/css">
+	form{
+		padding: 15px;
+	}
+</style>
+{% endblock %}
+{% block body %}
+<div class="container">
+	<form method="POST" class="card">
+		{% csrf_token %}
+		{{ form.media }}
+		{{ form|crispy }}
+	</form>
+</div>
+{% endblock %}

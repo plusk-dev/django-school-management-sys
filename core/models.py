@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from ckeditor.fields import RichTextField
 
 # Create your models here.
 class Person(models.Model):
@@ -72,5 +73,14 @@ class Announcement(models.Model):
 	date = models.DateTimeField(auto_now_add=True)
 	content = models.TextField()
 	public = models.BooleanField(default=False)
+	def __str__(self):
+		return self.title
+
+class Exam(models.Model):
+	title = models.CharField(max_length=256)
+	status = models.BooleanField(default=False)
+	date = models.DateTimeField(auto_now_add=True)
+	text = RichTextField()
+
 	def __str__(self):
 		return self.title
