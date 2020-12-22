@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import NewStudentForm, QuestionForm, HomeworkForm, SubmitForm, AnswerForm, RoomForm, AnnouncementForm
+from .forms import NewStudentForm, QuestionForm, HomeworkForm, SubmitForm, AnswerForm, RoomForm, AnnouncementForm, MoreNewStudentForm
 from .models import Person, Homework, Question, Submission, Answer, Room, Announcement
 import datetime
 from .quotes import quote
