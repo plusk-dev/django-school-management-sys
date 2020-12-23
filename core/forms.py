@@ -75,3 +75,6 @@ class ExamForm(forms.ModelForm):
 	class Meta:
 		model = Exam
 		fields = '__all__'
+		widgets = {
+			'status': forms.TextInput(attrs={'type':'hidden'})
+		}

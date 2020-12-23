@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TeacherDashboard,StudentDashboard,AdminDashboard,CreatePerson, CreateHomework,SubmitHW, SingleQuestion, AnnouncementsView,PrivateAnnouncements ,CreateExamView
+from .views import TeacherDashboard,StudentDashboard,AdminDashboard,CreatePerson, CreateHomework,SubmitHW, SingleQuestion, AnnouncementsView,PrivateAnnouncements ,CreateExamView, ExamPost
 
 from .home import IndexView, HomeView
 from .authentication import StudentLoginView, TeacherLogin, AdminLogin
@@ -19,6 +19,7 @@ urlpatterns = [
 	path('admin_dashboard/', AdminDashboard.as_view(), name='admin_dashboard'),
 	path('admin_dashboard/new_student/', CreatePerson.as_view(), name='create_person'),
 	path('admin_dashboard/create_exam/', CreateExamView.as_view(), name='create_exam'),
+	path('admin_dashboard/exam/success/', ExamPost.as_view(), name='post_exam'),
 	path('homework/<int:pk>/', SubmitHW.as_view(), name='submit_hw'),
 	path('private_announcements/', PrivateAnnouncements.as_view(), name='pvt_announcements'),
 	path('question/<int:pk>/', SingleQuestion.as_view(), name='question'),

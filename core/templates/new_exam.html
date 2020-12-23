@@ -9,10 +9,11 @@
 {% endblock %}
 {% block body %}
 <div class="container">
-	<form method="POST" class="card">
+	<form method="POST" class="card" action="{% url 'post_exam' %}">
 		{% csrf_token %}
 		{{ form.media }}
 		{{ form|crispy }}
+		<button class="btn btn-success btn-sm">Create</button>
 	</form>
 </div>
 {% endblock %}

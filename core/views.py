@@ -217,3 +217,21 @@ class CreateExamView(LoginRequiredMixin, View):
     def get(self ,request):
         form = ExamForm()
         return render(request, self.template_name, {'form':form})
+
+
+class ExamPost(LoginRequiredMixin, View):
+    def post(self, request):
+        try:
+            person = Person.objects.get(user=request.user)
+        except:
+            person = None
+
+        if person and person.is_admin:
+            form = ExamForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Exam Created.')
+                return redirect('admin_dashboard')
+            else:
+                messages.warning(request, 'An error occured.Please Try Again.')
+                return redirect('create_exam')
