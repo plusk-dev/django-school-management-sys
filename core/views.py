@@ -6,9 +6,11 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import NewStudentForm, QuestionForm, HomeworkForm, SubmitForm, AnswerForm, RoomForm, AnnouncementForm, MoreNewStudentForm, ExamForm
-from .models import Person, Homework, Question, Submission, Answer, Room, Announcement
+from .models import Person, Homework, Question, Submission, Answer, Room, Announcement, Exam
 import datetime
 from .quotes import quote
+from .hooks import send
+from bs4 import BeautifulSoup
 
 
 class AnnouncementsView(View):
@@ -117,6 +119,14 @@ class CreateHomework(LoginRequiredMixin, View):
             form = HomeworkForm(request.POST)
             if form.is_valid():
                 form.save()
+                data = dict(form.data)
+                title = data['title'][0]
+                asker_id = data['asker'][0]
+                asker = Person.objects.get(id=int(asker_id))
+                grade = data['std'][0]
+                url = data['url'][0]
+                description = data['description'][0]
+                send(f'class-{grade}', f'**HOMEWORK NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\n{url}')
                 messages.success(request, 'Homework Created.')
                 return redirect('teacher_dashboard')
 
@@ -165,6 +175,10 @@ class AdminDashboard(LoginRequiredMixin, View):
         form = AnnouncementForm(request.POST)
         if form.is_valid():
             form.save()
+            data = dict(form.data)
+            title = data['title'][0]
+            content = data['content'][0]
+            send('announcements', f'**{title}**\n\n{content}')
             messages.success(request, 'Announcement Made Successfully')
             return redirect('admin_dashboard')
 
@@ -229,7 +243,10 @@ class ExamPost(LoginRequiredMixin, View):
         if person and person.is_admin:
             form = ExamForm(request.POST)
             if form.is_valid():
-                form.save()
+                data = dict(form.data)
+                created_exam = Exam.objects.create(title = data['title'][0], status=True, text = data['text'][0])
+                soup = BeautifulSoup(created_exam.text, 'html.parser')
+                send('exam-notifications', f'**EXAM NOTIFICATION**\n\n**{created_exam.title}**\n{soup.text}')
                 messages.success(request, 'Exam Created.')
                 return redirect('admin_dashboard')
             else:
