@@ -1,6 +1,7 @@
 # Setup
 
-Install all the required packages: `pip install -r requirements.txt`
+Install all the required packages: `pip install -r requirements.txt` and
+add your Discord Webhook URLs in core/hooks.py.
 
  1. `python manage.py makemigrations`
  2. `python manage.py migrate`
