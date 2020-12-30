@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import TeacherDashboard,StudentDashboard,AdminDashboard,CreatePerson, CreateHomework,SubmitHW, SingleQuestion, AnnouncementsView,PrivateAnnouncements ,CreateExamView, ExamPost
+from .views import TeacherDashboard,StudentDashboard,AdminDashboard,CreatePerson, CreateHomework,SubmitHW, SingleQuestion, AnnouncementsView,PrivateAnnouncements ,CreateExamView, ExamPost, ResultsView
 
 from .home import IndexView, HomeView
 from .authentication import StudentLoginView, TeacherLogin, AdminLogin
 from .room import CreateRoom
-from .general import deleteRoom, deleteAnswer, deletePerson, signout, markCorrect, markHWCorrect
+from .general import deleteRoom, deleteAnswer, deletePerson, signout, markCorrect, markHWCorrect, stopExam
 
 urlpatterns = [
 	path('', IndexView.as_view(), name='index'),
@@ -26,7 +26,9 @@ urlpatterns = [
 	path('question/delete/<int:pk>/', deleteAnswer, name='delete_ans'),
 	path('question/markCorrect/<int:pk>', markCorrect, name='markCorrect'),
 	path('homework/markCorrect/<int:pk>', markHWCorrect, name='markHWCorrect'),
+	path('student_dashboard/results/<int:pk>', ResultsView.as_view(), name='results'),
 	path('teacher_dashboard/create_room/', CreateRoom.as_view(), name='create_room'),
+	path('admin_dashboard/stop_exam/<int:pk>/', stopExam, name='stop_exam'),
 	path('teacher_dashboard/delete_room/<int:pk>', deleteRoom, name='delete_room'),
 	path('admin_dashboard/delete/<int:pk>', deletePerson, name='delete_person'),
 	path('teacher_dashboard/create_homework', CreateHomework.as_view(), name='create_homework')

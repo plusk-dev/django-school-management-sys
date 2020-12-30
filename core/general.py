@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from .models import Person, Answer, Room, Submission
+from .models import Person, Answer, Room, Submission, Exam
 from django.contrib.auth import logout
 
 @login_required
@@ -77,3 +77,15 @@ def signout(request):
     logout(request)
     messages.success(request, 'Logged Out.')
     return redirect('index')
+
+@login_required
+def stopExam(request, pk):
+    person = Person.objects.get(user=request.user)
+    if person.is_admin:
+        exam = Exam.objects.get(id=pk)
+        exam.delete()
+        messages.success(request, 'Exam Stopped Successfully.')
+        return redirect('admin_dashboard')
+    else:
+        messages.warning(request, 'You are not authorized to perform this action.')
+        return redirect('index')

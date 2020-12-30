@@ -2,10 +2,9 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .forms import NewStudentForm, QuestionForm, HomeworkForm, SubmitForm, AnswerForm, RoomForm, AnnouncementForm, MoreNewStudentForm, ExamForm
+from .forms import NewStudentForm, QuestionForm, HomeworkForm, SubmitForm, AnswerForm, RoomForm, AnnouncementForm, \
+    MoreNewStudentForm, ExamForm
 from .models import Person, Homework, Question, Submission, Answer, Room, Announcement, Exam
 import datetime
 from .quotes import quote
@@ -13,12 +12,15 @@ from .hooks import send
 from bs4 import BeautifulSoup
 from django.urls import reverse
 
+host = 'http://127.0.0.1:8000'
 
 class AnnouncementsView(View):
     template_name = 'announcements.html'
-    def get(self,request):
+
+    def get(self, request):
         announcements = Announcement.objects.filter(public=True).order_by('-date')
         return render(request, self.template_name, {'anns': announcements})
+
 
 class PrivateAnnouncements(LoginRequiredMixin, View):
     template_name = 'pvt_announcements.html'
@@ -28,12 +30,13 @@ class PrivateAnnouncements(LoginRequiredMixin, View):
         return render(request, self.template_name, {'anns': announcements})
 
 
-#******************DASHBOARDS******************#
+# ******************DASHBOARDS******************#
 class StudentDashboard(LoginRequiredMixin, View):
     template_name = 'sdash.html'
 
     def get(self, request):
         person = Person.objects.get(user=request.user)
+        exams = Exam.objects.all()
         if person and not person.is_teacher and not person.is_admin:
             hws_list = Homework.objects.filter(std=person.std).order_by('-date')
             ques_list = Question.objects.all().order_by('-date')
@@ -50,10 +53,13 @@ class StudentDashboard(LoginRequiredMixin, View):
                     hws.append(i)
                     print(hws)
             rooms = Room.objects.filter(std=person.std)
-            return render(request, self.template_name, {'hws': hws, 'ques': ques, 'subs': subs, 'allhw': hws_list, 'allques': ques_list, 'rooms': rooms, 'quote': quote()[0]})
+            return render(request, self.template_name,
+                          {'hws': hws, 'ques': ques, 'subs': subs, 'allhw': hws_list, 'allques': ques_list,
+                           'rooms': rooms, 'quote': quote()[0], 'exams': exams})
         else:
             messages.warning(request, 'You are not authorized to login as a student.')
             return redirect('index')
+
 
 class SingleQuestion(LoginRequiredMixin, View):
     template_name = 'question.html'
@@ -96,7 +102,9 @@ class TeacherDashboard(LoginRequiredMixin, View):
 
             form = QuestionForm()
             hw_form = HomeworkForm()
-            return render(request, self.template_name, {'hws': hws, 'ques': ques, 'form': form, 'hwform': hw_form, 'allhw': hws_list, 'allques': ques_list, 'rooms': rooms, 'quote': quote()[0]})
+            return render(request, self.template_name,
+                          {'hws': hws, 'ques': ques, 'form': form, 'hwform': hw_form, 'allhw': hws_list,
+                           'allques': ques_list, 'rooms': rooms, 'quote': quote()[0]})
         else:
             messages.warning(request, 'You are not authorized to login as a teacher.')
             return redirect('index')
@@ -110,7 +118,7 @@ class TeacherDashboard(LoginRequiredMixin, View):
             asker = Person.objects.get(id=int(asker_id))
             grade = data['std'][0]
             description = data['description'][0]
-            created_question = Question.objects.create(title=title, asker=asker, std=grade, description=description)            
+            created_question = Question.objects.create(title=title, asker=asker, std=grade, description=description)
             description = data['description'][0]
             url = reverse('question', args=[int(created_question.pk)])
             message = f'**QUESTION NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\nAnswer Here: http://127.0.0.1:8000{url}'
@@ -137,16 +145,17 @@ class CreateHomework(LoginRequiredMixin, View):
                 grade = data['std'][0]
                 url = data['url'][0]
                 description = data['description'][0]
-                send(f'class-{grade}', f'**HOMEWORK NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\n{url}')
-                send(f'class-{grade}-teachers', f'**HOMEWORK NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\n{url}')
+                send(f'class-{grade}',
+                     f'**HOMEWORK NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\n{url}')
+                send(f'class-{grade}-teachers',
+                     f'**HOMEWORK NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\n{url}')
                 messages.success(request, 'Homework Created.')
                 return redirect('teacher_dashboard')
 
 
-
-
 class SubmitHW(LoginRequiredMixin, View):
     template_name = 'submithw.html'
+
     def get(self, request, pk):
         homework = Homework.objects.get(id=pk)
         submissions = Submission.objects.filter(hw=homework)
@@ -160,8 +169,12 @@ class SubmitHW(LoginRequiredMixin, View):
         if form.is_valid():
             data = dict(form.data)
             print(data)
-            Submission.objects.create(
+            sub = Submission.objects.create(
                 submitter=person, hw=homework, answer=data['answer'][0], url=data['url'][0], status=False)
+            grade = homework.std
+            url = reverse('submit_hw', args=[int(homework.pk)])
+            send(f'class-{grade}-teachers',
+                 f'**SUBMISSION RECEIVED**\n**{sub.submitter}** has submitted to **{homework.title}**.\n\n**Homework Details:**\nTitle: {homework.title}\nGiven By:{homework.asker}\nDate: {homework.date}\nFor: Class {homework.std}\n{homework.description}\n\n**Submission Details:**\nAnswer: {sub.answer}\nDate: {sub.date}\n{sub.url}\n\nView Submissions Here: {host}{url}')
             messages.success(request, 'Submitted Successfully')
             return redirect('student_dashboard')
 
@@ -173,11 +186,14 @@ class AdminDashboard(LoginRequiredMixin, View):
         users = User.objects.all().order_by('-date_joined')
         person = Person.objects.all()
         logger = Person.objects.get(user=request.user)
+        exams = Exam.objects.all()
         if logger and logger.is_admin:
             form = NewStudentForm()
             more = MoreNewStudentForm()
             announcement_form = AnnouncementForm()
-            return render(request, self.template_name, {'users': users, 'form': NewStudentForm, 'more': MoreNewStudentForm, 'annform': announcement_form})
+            return render(request, self.template_name,
+                          {'users': users, 'form': NewStudentForm, 'more': MoreNewStudentForm,
+                           'annform': announcement_form, 'exams': exams})
         else:
             messages.warning(request, 'You are not authorized to log in as an administrator.')
             return redirect('index')
@@ -192,6 +208,7 @@ class AdminDashboard(LoginRequiredMixin, View):
             send('announcements', f'**{title}**\n\n{content}')
             messages.success(request, 'Announcement Made Successfully')
             return redirect('admin_dashboard')
+
 
 class CreatePerson(LoginRequiredMixin, View):
     def post(self, request):
@@ -213,7 +230,7 @@ class CreatePerson(LoginRequiredMixin, View):
                 address = str(more_data['address'][0])
                 password = str(data['password1'][0])
                 std = str(data['std'][0])
-                #this try/except statement can be polished
+                # this try/except statement can be polished
                 try:
                     approval = str(more_data['is_teacher'])
                     User.objects.create_user(name, email, password)
@@ -237,11 +254,13 @@ class CreatePerson(LoginRequiredMixin, View):
                     messages.warning(request, 'Student Created Successfully.')
                     return redirect('admin_dashboard')
 
+
 class CreateExamView(LoginRequiredMixin, View):
     template_name = 'new_exam.html'
-    def get(self ,request):
+
+    def get(self, request):
         form = ExamForm()
-        return render(request, self.template_name, {'form':form})
+        return render(request, self.template_name, {'form': form})
 
 
 class ExamPost(LoginRequiredMixin, View):
@@ -255,7 +274,7 @@ class ExamPost(LoginRequiredMixin, View):
             form = ExamForm(request.POST)
             if form.is_valid():
                 data = dict(form.data)
-                created_exam = Exam.objects.create(title = data['title'][0], status=True, text = data['text'][0])
+                created_exam = Exam.objects.create(title=data['title'][0], status=True, text=data['text'][0])
                 soup = BeautifulSoup(created_exam.text, 'html.parser')
                 send('exam-notifications', f'**EXAM NOTIFICATION**\n\n**{created_exam.title}**\n{soup.text}')
                 messages.success(request, 'Exam Created.')
@@ -263,3 +282,10 @@ class ExamPost(LoginRequiredMixin, View):
             else:
                 messages.warning(request, 'An error occured.Please Try Again.')
                 return redirect('create_exam')
+
+class ResultsView(LoginRequiredMixin, View):
+    template_name = 'results.html'
+    def get(self, request, pk):
+        exam = Exam.objects.get(id=pk)
+
+        return render(request, self.template_name, {'exam':exam})
