@@ -1,6 +1,5 @@
 import random
 import requests
-import json
 
 def quote():
     info = {
@@ -9,6 +8,6 @@ def quote():
         'format':'json'
     }
     response = requests.get('http://api.forismatic.com/api/1.0/',info)
-    content =json.loads(response.text)
+    content =response.json()
     return content["quoteText"],content["quoteAuthor"]
 

@@ -11,6 +11,7 @@ import datetime
 from .quotes import quote
 from .hooks import send
 from bs4 import BeautifulSoup
+from django.urls import reverse
 
 
 class AnnouncementsView(View):
@@ -103,7 +104,17 @@ class TeacherDashboard(LoginRequiredMixin, View):
     def post(self, request):
         form = QuestionForm(request.POST)
         if form.is_valid():
-            form.save()
+            data = dict(form.data)
+            title = data['title'][0]
+            asker_id = data['asker'][0]
+            asker = Person.objects.get(id=int(asker_id))
+            grade = data['std'][0]
+            description = data['description'][0]
+            created_question = Question.objects.create(title=title, asker=asker, std=grade, description=description)            
+            description = data['description'][0]
+            url = reverse('question', args=[int(created_question.pk)])
+            message = f'**QUESTION NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\nAnswer Here: http://127.0.0.1:8000{url}'
+            send(f'class-{grade}', message)
             messages.success(request, 'Asked Successfully.')
             return redirect('teacher_dashboard')
         else:
@@ -127,6 +138,7 @@ class CreateHomework(LoginRequiredMixin, View):
                 url = data['url'][0]
                 description = data['description'][0]
                 send(f'class-{grade}', f'**HOMEWORK NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\n{url}')
+                send(f'class-{grade}-teachers', f'**HOMEWORK NOTIFICATION**\n\n{title}\nBy: {asker}\nFor: Class {grade}\n{description}\n{url}')
                 messages.success(request, 'Homework Created.')
                 return redirect('teacher_dashboard')
 
@@ -135,7 +147,6 @@ class CreateHomework(LoginRequiredMixin, View):
 
 class SubmitHW(LoginRequiredMixin, View):
     template_name = 'submithw.html'
-
     def get(self, request, pk):
         homework = Homework.objects.get(id=pk)
         submissions = Submission.objects.filter(hw=homework)
