@@ -1,5 +1,5 @@
 from django import forms
-from .models import Person, Question, Homework, Submission, Answer, Room, Announcement, Exam
+from .models import Person, Question, Homework, Submission, Answer, Room, Announcement, Exam, Result
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 

@@ -99,6 +99,7 @@ class Exam(models.Model):
 class ResultSubject(models.Model):
     subject_name = models.CharField(max_length=256)
     score = models.IntegerField()
+    grade = models.CharField(max_length=10, default='X')
 
     def __str__(self):
         return self.subject_name
@@ -115,7 +116,7 @@ class Result(models.Model):
 
 class Declared(models.Model):
     status = models.BooleanField(default=False)
-
+    result = models.ForeignKey(Result, on_delete=models.CASCADE, related_name='declaration_status')
     def __str__(self):
         if self.status == True:
             return 'Declared'

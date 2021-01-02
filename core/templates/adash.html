@@ -25,7 +25,7 @@
 <a href="{% url 'create_exam' %}" class="btn btn-success btn-sm">Create Exam</a><br><br>
   {% for exam in exams %}
   {% if exam.status == True %}
-  <h5><span class="badge bg-warning">{{ exam.title }} is going on since {{ exam.date }}. <a href="{% url 'stop_exam' exam.pk %}">Click Here to stop this exam.</a></span></h5>
+  <h5><span class="badge bg-warning" style="color: black;">{{ exam.title }} is going on since {{ exam.date }}.<br><a href="{% url 'stop_exam' exam.pk %}" class="btn btn-outline-danger btn-sm" style="margin-top: 8px;">Click Here to stop this exam.</a><a href="#" class="btn btn-outline-primary btn-sm" style="margin-top: 8px;">Click here to make results.</a></span></h5>
   {% endif %}
   {% endfor %}
 <!-- Modal -->

@@ -5,6 +5,7 @@ from .home import IndexView, HomeView
 from .authentication import StudentLoginView, TeacherLogin, AdminLogin
 from .room import CreateRoom
 from .general import deleteRoom, deleteAnswer, deletePerson, signout, markCorrect, markHWCorrect, stopExam
+from .exams import CreateResultsView
 
 urlpatterns = [
 	path('', IndexView.as_view(), name='index'),
@@ -27,6 +28,7 @@ urlpatterns = [
 	path('question/markCorrect/<int:pk>', markCorrect, name='markCorrect'),
 	path('homework/markCorrect/<int:pk>', markHWCorrect, name='markHWCorrect'),
 	path('student_dashboard/results/<int:pk>', ResultsView.as_view(), name='results'),
+	path('admin_dashboard/create_results/<int:pk>', CreateResultsView.as_view(), name='create_results'),
 	path('teacher_dashboard/create_room/', CreateRoom.as_view(), name='create_room'),
 	path('admin_dashboard/stop_exam/<int:pk>/', stopExam, name='stop_exam'),
 	path('teacher_dashboard/delete_room/<int:pk>', deleteRoom, name='delete_room'),
